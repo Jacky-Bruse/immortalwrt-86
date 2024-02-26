@@ -199,8 +199,7 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
-        echo "::set-output name=release_tag::Immortalwrt_$(date +"%Y.%m.%d-%H%M")"
-        echo "release_tag=Immortalwrt_$(date +"%Y.%m.%d-%H%M")
+        echo "release_tag=OpenWrt_$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         touch release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
