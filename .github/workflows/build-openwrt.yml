@@ -199,9 +199,8 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
-        echo "release_tag=$(cat openwrt/wget/op_version1)" >> $GITHUB_OUTPUT
-        echo -e "\n* The stable source code has been updated." >> release.txt
-        sed -i '1i ## Firmware Update Log' release.txt
+        echo "::set-output name=release_tag::Immortalwrt_$(date +"%Y.%m.%d-%H%M")"
+        echo "release_tag=Immortalwrt_$(date +"%Y.%m.%d-%H%M")
         touch release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
