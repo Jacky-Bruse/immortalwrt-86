@@ -118,7 +118,7 @@ jobs:
     - name: lee
       run: |
         cd openwrt 
-        bash  Lee.sh
+        bash  lee.sh
 
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
