@@ -87,7 +87,7 @@ cat>files/usr/share/Check_Update.sh<<-\EOF
 exit 0
 EOF
 
-cat>files/usr/share/Lee.sh<<-\EOOF
+cat>lee.sh<<-\EOOF
 #!/bin/bash
 Lee_version="`date '+%y%m%d%H%M'`_sta_Lee" 
 echo $Lee_version >  wget/DISTRIB_REVISION1 
