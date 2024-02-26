@@ -115,10 +115,10 @@ jobs:
         cd openwrt/package    
         git clone -b immor https://github.com/Blueplanet20120/luci-app-romupdate.git
    
-    - name: lenyu
+    - name: lee
       run: |
         cd openwrt 
-        bash  lenyu.sh
+        bash  Lee.sh
 
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
