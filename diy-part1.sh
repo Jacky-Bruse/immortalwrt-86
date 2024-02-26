@@ -76,8 +76,6 @@ sta_version=`grep "_uefi-gpt_sta_Lee.img.gz" wget/open_sta_md5 | cut -d - -f 3 |
 immortalwrt_sta=immortalwrt_x86-64-${sta_version}_sta_Lee.img.gz
 immortalwrt_sta_uefi=immortalwrt_x86-64-${sta_version}_uefi-gpt_sta_Lee.img.gz
 cd bin/targets/x86/64
-md5sum $immortalwrt_sta > immortalwrt_sta.md5
-md5sum $immortalwrt_sta_uefi > immortalwrt_sta_uefi.md5
 exit 0
 EOF
 
