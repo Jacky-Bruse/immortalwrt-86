@@ -176,7 +176,7 @@ jobs:
     - name: delete files
       run: |
         cd openwrt 
-        bash  rename21.sh
+        bash  rename.sh
     
 
     - name: Organize files
