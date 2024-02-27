@@ -81,5 +81,5 @@ jobs:
       uses: Jacky-Bruse/delete-workflow-runs@main
       with:
         retain_days: 1
-        keep_minimum_runs: 1
+        keep_minimum_runs: 2
         
