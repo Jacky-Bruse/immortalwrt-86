@@ -214,10 +214,11 @@ jobs:
         files: ${{ env.FIRMWARE }}/*
 
     - name: Delete workflow runs
-      uses: Jacky-Bruse/delete-workflow-runs@main
+      uses: Mattraks/delete-workflow-runs@v2
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         retain_days: 1
-        keep_minimum_runs: 4
+        keep_minimum_runs: 3
 
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.3.2
