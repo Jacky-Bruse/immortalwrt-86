@@ -228,3 +228,13 @@ jobs:
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Notify Telegram on Build Result
+      run: |
+        if [ ${{ job.status }} == 'success' ]; then
+          MESSAGE="OpenWrt_21.02 构建成功！"
+        else
+          MESSAGE="⚠ OpenWrt_21.02 构建失败！"
+        fi
+        TELEGRAM_API="https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage"
+        curl -s -X POST $TELEGRAM_API -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} -d text="$MESSAGE"
