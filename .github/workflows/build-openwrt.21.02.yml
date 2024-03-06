@@ -215,9 +215,11 @@ jobs:
 
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@v2.0.6
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        retain_days: 2
-        keep_minimum_runs: 5
+          retain_days: 3
+          keep_minimum_runs: 6
 
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.3.2
