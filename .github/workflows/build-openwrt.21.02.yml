@@ -214,10 +214,10 @@ jobs:
         files: ${{ env.FIRMWARE }}/*
 
     - name: Delete workflow runs
-      uses: Jacky-Bruse/delete-workflow-runs@main
+      uses: Mattraks/delete-workflow-runs@v2.0.6
       with:
         retain_days: 2
-        keep_minimum_runs: 10
+        keep_minimum_runs: 5
 
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.3.2
