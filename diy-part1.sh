@@ -15,6 +15,8 @@
 sed -i "/helloworld/d" "feeds.conf.default"
 echo "src-git helloworld https://github.com/fw876/helloworld.git" >> "feeds.conf.default"
 echo "src-git mihomo https://github.com/morytyann/OpenWrt-mihomo.git;main" >> "feeds.conf.default"
+sed -i '$a src-git adguard https://github.com/281677160/openwrt-package.git;adguard' feeds.conf.default
+
 
 # Add a feed source
 
