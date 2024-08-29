@@ -13,8 +13,7 @@
 # Uncomment a feed source
 # Add a feed helloword
 sed -i "/helloworld/d" "feeds.conf.default"
-sed -i "/luci/d" "feeds.conf.default"
-
+#sed -i "/luci/d" "feeds.conf.default"
 echo "src-git helloworld https://github.com/fw876/helloworld.git" >> "feeds.conf.default"
 echo "src-git mihomo https://github.com/morytyann/OpenWrt-mihomo.git;main" >> "feeds.conf.default"
 echo "src-git kiddin9 https://github.com/kiddin9/openwrt-packages.git" >> "feeds.conf.default"
