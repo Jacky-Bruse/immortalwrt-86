@@ -16,7 +16,7 @@ sed -i "/helloworld/d" "feeds.conf.default"
 #sed -i "/luci/d" "feeds.conf.default"
 echo "src-git helloworld https://github.com/fw876/helloworld.git" >> "feeds.conf.default"
 echo "src-git mihomo https://github.com/morytyann/OpenWrt-mihomo.git;main" >> "feeds.conf.default"
-echo "src-git kiddin9 https://github.com/kiddin9/openwrt-packages.git" >> "feeds.conf.default"
+#echo "src-git kiddin9 https://github.com/kiddin9/openwrt-packages.git" >> "feeds.conf.default"
 #sed -i '$a src-git adguard https://github.com/281677160/openwrt-package.git;adguard' feeds.conf.default
 #svn co https://github.com/281677160/openwrt-package/trunk/luci-app-clash package/luci-app-clash
 #svn co https://github.com/281677160/openwrt-package/branches/19.07/luci-app-eqos package/luci-app-eqos
