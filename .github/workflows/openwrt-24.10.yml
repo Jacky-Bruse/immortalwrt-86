@@ -225,9 +225,9 @@ jobs:
     - name: Notify Telegram on Build Result
       run: |
         if [ ${{ job.status }} == 'success' ]; then
-          MESSAGE="OpenWrt_23.05 构建成功！"
+          MESSAGE="OpenWrt_24.10 构建成功！"
         else
-          MESSAGE="⚠ OpenWrt_23.05 构建失败！"
+          MESSAGE="⚠ OpenWrt_24.10 构建失败！"
         fi
         TELEGRAM_API="https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage"
         curl -s -X POST $TELEGRAM_API -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} -d text="$MESSAGE"
