@@ -194,7 +194,7 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
-        echo "release_tag=Raspberry-4B-OpenWRT_$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
+        echo "release_tag=Cudy-OpenWRT_$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         touch release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
@@ -227,7 +227,7 @@ jobs:
     - name: Notify Telegram on Build Result
       run: |
         if [ ${{ job.status }} == 'success' ]; then
-          MESSAGE="Raspberry-4B-OpenWRT 构建成功！"
+          MESSAGE="Cudy-OpenWRT 构建成功！"
         else
           MESSAGE="⚠ OpenWrt_23.05 构建失败！"
         fi
