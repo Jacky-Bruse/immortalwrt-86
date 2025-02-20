@@ -129,7 +129,7 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/scripts/*.sh
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
-        $GITHUB_WORKSPACE/scripts/preset-clash-core.sh $CLASH_BINARY_PLATFORM
+        $GITHUB_WORKSPACE/scripts/preset-clash-core-x86.sh $CLASH_BINARY_PLATFORM
 
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
