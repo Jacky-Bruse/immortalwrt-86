@@ -38,6 +38,7 @@ env:
   UPLOAD_WETRANSFER: false
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
+  CLASH_BINARY_PLATFORM: x86-64
 
 jobs:
   build:
@@ -126,6 +127,7 @@ jobs:
         chmod +x $DIY_P2_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
+        $GITHUB_WORKSPACE/scripts/preset-clash-core-x86.sh $CLASH_BINARY_PLATFORM
 
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
