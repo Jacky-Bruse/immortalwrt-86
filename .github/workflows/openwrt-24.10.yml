@@ -73,10 +73,12 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         sudo bash -c 'bash <(curl -s https://build-scripts.immortalwrt.org/init_build_environment.sh)'
-        sudo dpkg --configure -a
+        sudo dpkg --configure -a || true
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
+        echo "check essential build tools:"
+        for c in gcc g++ make git python3 file rsync wget unzip tar; do command -v $c >/dev/null || { echo "::error::missing build tool: $c"; exit 1; }; done
 
     - name: Clone source code
       working-directory: /workdir
