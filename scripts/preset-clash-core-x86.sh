@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e -o pipefail
 #=================================================
 # File name: preset-clash-core.sh
 # Usage: <preset-clash-core.sh $platform> | example: <preset-clash-core.sh armv8>

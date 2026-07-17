@@ -34,8 +34,6 @@ env:
   DIY_P2_SH: diy-part2.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_COWTRANSFER: false
-  UPLOAD_WETRANSFER: false
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
   CLASH_BINARY_PLATFORM: x86-64
@@ -47,7 +45,7 @@ jobs:
 
     steps:
     - name: Maximize Build Space
-      uses: easimon/maximize-build-space@master
+      uses: easimon/maximize-build-space@v10
       with:
         root-reserve-mb: 6144
         swap-size-mb: 10240
@@ -85,7 +83,7 @@ jobs:
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
    
     - name: Cache
-      uses: klever1988/cachewrtbuild@main
+      uses: stupidloud/cachewrtbuild@b729f807837dbc3455d02fd35192660d9b662121
       with:
        ccache: 'true'
        clean:  'false'  # 'false'
@@ -104,10 +102,6 @@ jobs:
         #cd openwrt/package 		
         #git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argonn
    
-    - name: luci-app-romupdate
-      run: |
-        cd openwrt/package    
-        git clone -b immor https://github.com/Blueplanet20120/luci-app-romupdate.git
    
     - name: lee
       run: |
@@ -163,7 +157,7 @@ jobs:
       run: df -hT
 
     - name: Upload bin directory
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v4
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
@@ -185,7 +179,7 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware directory
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v4
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
@@ -200,7 +194,7 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware to release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: steps.tag.outputs.status == 'success' && !cancelled()
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -208,13 +202,6 @@ jobs:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
-
-    - name: Delete workflow runs
-      uses: Mattraks/delete-workflow-runs@v2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        retain_days: 1
-        keep_minimum_runs: 3
 
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.3.2
@@ -226,18 +213,19 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Notify Telegram on Build Result
+      if: always()
       run: |
-        if [ ${{ job.status }} == 'success' ]; then
+        if [ "${{ job.status }}" == "success" ]; then
           MESSAGE="OpenWrt_24.10 构建成功！"
         else
           MESSAGE="⚠ OpenWrt_24.10 构建失败！"
         fi
-        TELEGRAM_API="https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage"
+        TELEGRAM_API="https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage"
         curl -s -X POST $TELEGRAM_API -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} -d text="$MESSAGE"
 
     - name: Delete old workflow runs
-      uses: Mattraks/delete-workflow-runs@v2.0.6
+      uses: Mattraks/delete-workflow-runs@v2
       with:
-        retain_days: '20' # 删除20天前的 runs
-        token: ${{ secrets.PAT_TOKEN }}
-        keep_minimum_runs: 2
+        token: ${{ secrets.GITHUB_TOKEN }}
+        retain_days: 20
+        keep_minimum_runs: 3

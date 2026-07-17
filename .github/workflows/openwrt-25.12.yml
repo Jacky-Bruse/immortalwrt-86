@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: Build OpenWrt 23.05
+name: Build OpenWrt 25.12
 
 on:
   repository_dispatch:
@@ -27,15 +27,13 @@ on:
   
 env:
   REPO_URL: --single-branch --filter=blob:none https://github.com/immortalwrt/immortalwrt
-  REPO_BRANCH: openwrt-23.05
+  REPO_BRANCH: openwrt-25.12
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: .diffconfig
+  CONFIG_FILE: .diffconfig2512
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_COWTRANSFER: false
-  UPLOAD_WETRANSFER: false
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
   CLASH_BINARY_PLATFORM: x86-64
@@ -47,7 +45,7 @@ jobs:
 
     steps:
     - name: Maximize Build Space
-      uses: easimon/maximize-build-space@master
+      uses: easimon/maximize-build-space@v10
       with:
         root-reserve-mb: 6144
         swap-size-mb: 10240
@@ -86,7 +84,7 @@ jobs:
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
    
     - name: Cache
-      uses: klever1988/cachewrtbuild@main
+      uses: stupidloud/cachewrtbuild@b729f807837dbc3455d02fd35192660d9b662121
       with:
        ccache: 'true'
        clean:  'false'  # 'false'
@@ -105,10 +103,6 @@ jobs:
         #cd openwrt/package 		
         #git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argonn
    
-    - name: luci-app-romupdate
-      run: |
-        cd openwrt/package    
-        git clone -b immor https://github.com/Blueplanet20120/luci-app-romupdate.git
    
     - name: lee
       run: |
@@ -164,7 +158,7 @@ jobs:
       run: df -hT
 
     - name: Upload bin directory
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v4
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
@@ -186,7 +180,7 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware directory
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v4
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
@@ -196,7 +190,7 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
-        echo "release_tag=OpenWrt_23.05_$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
+        echo "release_tag=OpenWrt_25.12_$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         touch release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
@@ -210,13 +204,6 @@ jobs:
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
-    - name: Delete workflow runs
-      uses: Mattraks/delete-workflow-runs@v2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        retain_days: 1
-        keep_minimum_runs: 3
-
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.3.2
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
@@ -227,18 +214,19 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Notify Telegram on Build Result
+      if: always()
       run: |
-        if [ ${{ job.status }} == 'success' ]; then
-          MESSAGE="OpenWrt_23.05 构建成功！"
+        if [ "${{ job.status }}" == "success" ]; then
+          MESSAGE="OpenWrt_25.12 构建成功！"
         else
-          MESSAGE="⚠ OpenWrt_23.05 构建失败！"
+          MESSAGE="⚠ OpenWrt_25.12 构建失败！"
         fi
-        TELEGRAM_API="https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage"
+        TELEGRAM_API="https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage"
         curl -s -X POST $TELEGRAM_API -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} -d text="$MESSAGE"
 
     - name: Delete old workflow runs
-      uses: Mattraks/delete-workflow-runs@v2.0.6
+      uses: Mattraks/delete-workflow-runs@v2
       with:
-        retain_days: '20' # 删除20天前的 runs
-        token: ${{ secrets.PAT_TOKEN }}
-        keep_minimum_runs: 2
+        token: ${{ secrets.GITHUB_TOKEN }}
+        retain_days: 20
+        keep_minimum_runs: 3
