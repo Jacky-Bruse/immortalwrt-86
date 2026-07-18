@@ -48,18 +48,23 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
-    - name: Calc root reserve
+    - name: Calc disk reserve
       id: reserve
       run: |
+        # 当前 runner 镜像无独立 /mnt 盘，easimon 的第二个 pv 会落回根盘，
+        # 根分区最终剩余 ≈ temp-reserve-mb（root-reserve-mb 会被第二个 pv 吃掉）
         total=$(df -BM --output=size / | tail -1 | tr -dc '0-9')
-        if [ "$total" -ge 100000 ]; then reserve=24576; else reserve=12288; fi
-        echo "mb=$reserve" >> $GITHUB_OUTPUT
-        echo "root_total=${total}MB root_reserve=${reserve}MB"
+        if [ "$total" -ge 100000 ]; then temp=8192; else temp=6144; fi
+        root=$((temp + 2048))
+        echo "temp_mb=$temp" >> $GITHUB_OUTPUT
+        echo "root_mb=$root" >> $GITHUB_OUTPUT
+        echo "root_total=${total}MB temp_reserve=${temp}MB root_reserve=${root}MB"
 
     - name: Maximize Build Space
       uses: easimon/maximize-build-space@v10
       with:
-        root-reserve-mb: ${{ steps.reserve.outputs.mb }}
+        root-reserve-mb: ${{ steps.reserve.outputs.root_mb }}
+        temp-reserve-mb: ${{ steps.reserve.outputs.temp_mb }}
         swap-size-mb: 2048
         remove-dotnet: 'true'
         remove-android: 'true'
