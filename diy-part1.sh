@@ -15,7 +15,6 @@
 sed -i "/helloworld/d" "feeds.conf.default"
 #sed -i "/luci/d" "feeds.conf.default"
 echo "src-git helloworld https://github.com/fw876/helloworld.git" >> "feeds.conf.default"
-echo "src-git adguard https://github.com/Jacky-Bruse/openwrt-adguardhome.git" >> "feeds.conf.default"
 echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> "feeds.conf.default"
 #echo "src-git nekoclash https://github.com/Thaolga/luci-app-nekoclash.git" >> "feeds.conf.default"
 
@@ -56,13 +55,9 @@ EOF
 
 cat>rename.sh<<-\EOF
 #!/bin/bash
-rm -rf  bin/targets/x86/64/config.buildinfo
-rm -rf  bin/targets/x86/64/feeds.buildinfo
 rm -rf  bin/targets/x86/64/immortalwrt-x86-64-generic-kernel.bin
 rm -rf  bin/targets/x86/64/immortalwrt-x86-64-generic-squashfs-rootfs.img.gz
 rm -rf  bin/targets/x86/64/immortalwrt-x86-64-generic-rootfs.tar.gz
-rm -rf  bin/targets/x86/64/immortalwrt-x86-64-generic.manifest
-rm -rf bin/targets/x86/64/sha256sums
 rm -rf  bin/targets/x86/64/version.buildinfo
 rm -rf bin/targets/x86/64/immortalwrt-x86-64-generic-ext4-rootfs.img.gz
 rm -rf bin/targets/x86/64/immortalwrt-x86-64-generic-ext4-combined-efi.img.gz
