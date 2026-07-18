@@ -85,18 +85,24 @@ jobs:
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
+        mkdir -p /workdir/tmp
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
    
     - name: Cache
       uses: stupidloud/cachewrtbuild@b729f807837dbc3455d02fd35192660d9b662121
+      env:
+        RUNNER_TEMP: /workdir/tmp
       with:
        ccache: 'true'
        mixkey: '2410-x86'
        clean:  'false'  # 'false'
        prefix: ${{ github.workspace }}/openwrt
 
-    - name: Cache dl
-      uses: actions/cache@v4
+    - name: Restore dl cache
+      id: cache-dl
+      uses: actions/cache/restore@v6
+      env:
+        RUNNER_TEMP: /workdir/tmp
       with:
         path: /workdir/openwrt/dl
         key: dl-2410-${{ github.run_id }}
@@ -154,6 +160,19 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
+
+    - name: Check dl cache size
+      run: |
+        df -hT /workdir
+        du -sh /workdir/openwrt/dl
+
+    - name: Save dl cache
+      uses: actions/cache/save@v6
+      env:
+        RUNNER_TEMP: /workdir/tmp
+      with:
+        path: /workdir/openwrt/dl
+        key: ${{ steps.cache-dl.outputs.cache-primary-key }}
 
     - name: Compile the firmware
       id: compile
