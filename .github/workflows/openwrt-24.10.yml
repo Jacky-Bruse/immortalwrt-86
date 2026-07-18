@@ -48,10 +48,18 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
+    - name: Calc root reserve
+      id: reserve
+      run: |
+        total=$(df -BM --output=size / | tail -1 | tr -dc '0-9')
+        if [ "$total" -ge 100000 ]; then reserve=24576; else reserve=12288; fi
+        echo "mb=$reserve" >> $GITHUB_OUTPUT
+        echo "root_total=${total}MB root_reserve=${reserve}MB"
+
     - name: Maximize Build Space
       uses: easimon/maximize-build-space@v10
       with:
-        root-reserve-mb: 12288
+        root-reserve-mb: ${{ steps.reserve.outputs.mb }}
         swap-size-mb: 2048
         remove-dotnet: 'true'
         remove-android: 'true'
@@ -60,6 +68,15 @@ jobs:
         remove-docker-images: 'true'
         build-mount-path: '/workdir'
         
+    - name: Relocate runner temp to build volume
+      run: |
+        sudo mkdir -p /workdir/runner-temp
+        sudo cp -a "$RUNNER_TEMP/." /workdir/runner-temp/
+        sudo chown -R "$USER" /workdir/runner-temp
+        sudo mount --bind /workdir/runner-temp "$RUNNER_TEMP"
+        findmnt -T "$RUNNER_TEMP"
+        df -hT "$RUNNER_TEMP" /workdir
+
     - name: Checkout
       uses: actions/checkout@v4 # actions/checkout@main
 
@@ -85,13 +102,10 @@ jobs:
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        mkdir -p /workdir/tmp
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
    
     - name: Cache
       uses: stupidloud/cachewrtbuild@b729f807837dbc3455d02fd35192660d9b662121
-      env:
-        RUNNER_TEMP: /workdir/tmp
       with:
        ccache: 'true'
        mixkey: '2410-x86'
@@ -101,8 +115,6 @@ jobs:
     - name: Restore dl cache
       id: cache-dl
       uses: actions/cache/restore@v6
-      env:
-        RUNNER_TEMP: /workdir/tmp
       with:
         path: /workdir/openwrt/dl
         key: dl-2410-${{ github.run_id }}
@@ -168,8 +180,6 @@ jobs:
 
     - name: Save dl cache
       uses: actions/cache/save@v6
-      env:
-        RUNNER_TEMP: /workdir/tmp
       with:
         path: /workdir/openwrt/dl
         key: ${{ steps.cache-dl.outputs.cache-primary-key }}
@@ -244,6 +254,11 @@ jobs:
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Free space for cache saving
+      run: |
+        rm -rf /workdir/openwrt/build_dir/target-*
+        df -hT /workdir "$RUNNER_TEMP"
 
     - name: Notify Telegram on Build Result
       if: always()
