@@ -283,3 +283,21 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         retain_days: 20
         keep_minimum_runs: 3
+
+  prune-cache:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+    - name: Keep only latest cache per prefix
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+      run: |
+        # build 成功后运行：每类缓存按创建时间只保留最新一份
+        for prefix in '2512-x86-cache-openwrt-' 'dl-2512-'; do
+          gh cache list --key "$prefix" --sort created_at --order desc --json id --jq '.[1:][].id' \
+            | xargs -rn1 gh cache delete || true
+        done
+        gh cache list
