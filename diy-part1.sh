@@ -32,7 +32,6 @@ touch wget/DISTRIB_REVISION1
 # backup config
 cat>> package/base-files/files/lib/upgrade/keep.d/base-files-essential<<-EOF
 /etc/config/dhcp
-/etc/openclash/core/
 /etc/adguardhome/work/data/filters/
 EOF
 
