@@ -37,3 +37,44 @@ for opt in work_dir workdir; do
 done
 exit 0
 EOF
+
+# 冒充 wrtbwmon 给 wechatpush 提供设备流量：wrtbwmon 已被移出软件源，且统计不到 OpenClash 代理流量。
+# wechatpush 每轮调用 "wrtbwmon update <db>" 并按表头 in/out/total 读取该 CSV；
+# 这里改从 nlbwmon（连接跟踪计数，含代理流量）取累计值，按差值累加进 db，
+# 使 wechatpush 删除行（设备上线重置）和每日删库（零点重置）的逻辑照常生效。
+mkdir -p files/usr/sbin
+cat > files/usr/sbin/wrtbwmon <<'EOF'
+#!/bin/sh
+case "$1" in update|-f) db="$2" ;; *) exit 0 ;; esac
+[ -n "$db" ] || exit 0
+state="$db.nlbw"
+cur=$(nlbw -c csv -g mac,ip -s, -q 2>/dev/null | sed '1d')
+[ -n "$cur" ] || exit 0
+first=1; [ -f "$state" ] && first=0
+{
+	[ -f "$state" ] && sed 's/^/S,/' "$state"
+	[ -f "$db" ] && grep -v '^#' "$db" | sed 's/^/D,/'
+	awk 'NR>1 && $4 != "00:00:00:00:00:00" {print "A," $4 "," $1}' /proc/net/arp
+	echo "$cur" | sed 's/^/N,/'
+} | awk -F, -v first="$first" -v db="$db.tmp" -v st="$state.tmp" '
+	$1 == "S" { lrx[$2] = $3; ltx[$2] = $4; next }
+	$1 == "D" { din[$2] = $4; dout[$2] = $5; next }
+	$1 == "A" { arp[$2] = $3; next }
+	$1 == "N" && $2 != "00:00:00:00:00:00" {
+		rx[$2] += $5; tx[$2] += $7
+		if (!($2 in ip4) && $3 ~ /^[0-9.]+$/) ip4[$2] = $3
+	}
+	END {
+		print "#mac,ip,in,out,total" > db
+		for (m in rx) {
+			# 首次运行只建基线；计数变小说明 nlbwmon 重启或换周期，按新累计值计
+			dr = first ? 0 : ((m in lrx) && rx[m] >= lrx[m] ? rx[m] - lrx[m] : rx[m])
+			dt = first ? 0 : ((m in ltx) && tx[m] >= ltx[m] ? tx[m] - ltx[m] : tx[m])
+			i = din[m] + dr; o = dout[m] + dt
+			ip = (m in arp) ? arp[m] : ip4[m]
+			if (ip != "") printf "%s,%s,%.0f,%.0f,%.0f\n", m, ip, i, o, i + o > db
+			printf "%s,%.0f,%.0f\n", m, rx[m], tx[m] > st
+		}
+	}' && mv "$db.tmp" "$db" && mv "$state.tmp" "$state"
+EOF
+chmod +x files/usr/sbin/wrtbwmon
