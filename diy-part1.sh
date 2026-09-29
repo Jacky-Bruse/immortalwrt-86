@@ -48,7 +48,7 @@ rm -rf bin/targets/x86/64/immortalwrt-x86-64-generic-ext4-combined.img.gz
 sleep 2
 rename_version=`cat files/etc/Lee_version`
 str1=`grep "KERNEL_PATCHVER:="  target/linux/x86/Makefile | cut -d = -f 2` #判断当前默认内核版本号如6.12
-kpatch=`grep "LINUX_VERSION-${str1} ="  include/kernel-${str1} | cut -d . -f 3` #取小版本号，通用适配任意内核系列
+kpatch=`cat include/kernel-${str1} target/linux/generic/kernel-${str1} 2>/dev/null | grep "LINUX_VERSION-${str1} =" | cut -d . -f 3` #取小版本号；24.10 在 include/，25.12 起移到 target/linux/generic/
 sleep 2
 if [ -e bin/targets/x86/64/immortalwrt-x86-64-generic-squashfs-combined.img.gz ];then
   mv  bin/targets/x86/64/immortalwrt-x86-64-generic-squashfs-combined.img.gz       bin/targets/x86/64/immortalwrt_x86-64-${rename_version}_${str1}.${kpatch}_sta_Lee.img.gz
