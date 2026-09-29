@@ -11,10 +11,7 @@
 #
 
 # Uncomment a feed source
-# Add a feed helloword
-sed -i "/helloworld/d" "feeds.conf.default"
 #sed -i "/luci/d" "feeds.conf.default"
-echo "src-git helloworld https://github.com/fw876/helloworld.git" >> "feeds.conf.default"
 echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> "feeds.conf.default"
 #echo "src-git nekoclash https://github.com/Thaolga/luci-app-nekoclash.git" >> "feeds.conf.default"
 
@@ -35,21 +32,8 @@ touch wget/DISTRIB_REVISION1
 # backup config
 cat>> package/base-files/files/lib/upgrade/keep.d/base-files-essential<<-EOF
 /etc/config/dhcp
-/etc/config/xray
-/etc/config/sing-box
-/etc/config/passwall_show
-/etc/config/passwall_server
-/etc/config/passwall
-/usr/share/v2ray/geosite.dat
-/usr/share/v2ray/geoip.dat
-/usr/share/passwall/rules/
-/usr/share/singbox/
-/usr/share/v2ray/
 /etc/openclash/core/
-/usr/bin/chinadns-ng
-/usr/bin/sing-box
-/usr/bin/xray
-/usr/bin/hysteria
+/etc/adguardhome/work/data/filters/
 EOF
 
 
