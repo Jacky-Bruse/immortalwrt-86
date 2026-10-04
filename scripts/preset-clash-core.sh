@@ -12,7 +12,7 @@ set -e -o pipefail
 
 # 内核文件名用的是 Go 的架构叫法，与 OpenWrt 平台名做一次映射
 case "$1" in
-    x86-64)         CORE_ARCH="amd64" ;;
+    x86-64)         CORE_ARCH="amd64-v3" ;;
     armv8|aarch64)  CORE_ARCH="arm64" ;;
     *)              echo "unsupported platform: ${1:-<empty>}" >&2; exit 1 ;;
 esac
