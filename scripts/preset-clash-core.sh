@@ -12,7 +12,7 @@ set -e -o pipefail
 
 # 内核文件名用的是 Go 的架构叫法，与 OpenWrt 平台名做一次映射
 case "$1" in
-    x86-64)         CORE_ARCH="amd64-v3" ;;
+    x86-64)         CORE_ARCH="amd64-v1" ;;
     armv8|aarch64)  CORE_ARCH="arm64" ;;
     *)              echo "unsupported platform: ${1:-<empty>}" >&2; exit 1 ;;
 esac
@@ -34,7 +34,7 @@ wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat
 
 chmod +x files/etc/openclash/core/clash*
 
-# 插件首次开机会把内核版本强制设为 amd64-v1，CPU 支持 AVX2 时改回 v3，与预置内核一致
+# 预置 v1 保证任何 x86 都能运行；插件首次开机会把内核版本强制设为 amd64-v1，CPU 支持 AVX2 时改为 v3，后续在线更新即下载 v3
 # 文件名 zz- 开头，保证排在插件的 luci-openclash 之后执行
 mkdir -p files/etc/uci-defaults
 cat > files/etc/uci-defaults/zz-openclash-core <<'EOF'
