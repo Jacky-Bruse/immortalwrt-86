@@ -33,3 +33,11 @@ wget -qO- $GEOIP_URL > files/etc/openclash/GeoIP.dat
 wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat
 
 chmod +x files/etc/openclash/core/clash*
+
+# 插件首次开机会把内核版本强制设为 amd64-v1，CPU 支持 AVX2 时改回 v3，与预置内核一致
+# 文件名 zz- 开头，保证排在插件的 luci-openclash 之后执行
+mkdir -p files/etc/uci-defaults
+cat > files/etc/uci-defaults/zz-openclash-core <<'EOF'
+grep -qw avx2 /proc/cpuinfo && uci -q set openclash.config.core_version=linux-amd64-v3 && uci -q commit openclash
+exit 0
+EOF
