@@ -78,3 +78,14 @@ first=1; [ -f "$state" ] && first=0
 	}' && mv "$db.tmp" "$db" && mv "$state.tmp" "$state"
 EOF
 chmod +x files/usr/sbin/wrtbwmon
+
+# Lucky 软件源的 Makefile 写死了版本号，改为 GitHub 最新正式版（releases/latest 不含预发布）
+# 获取失败或该版本没有 x86_64 包时保留软件源自带的版本，不影响编译
+LUCKY_MK=feeds/lucky/lucky/Makefile
+if [ -f "$LUCKY_MK" ]; then
+	ver=$(curl -fsSIL -o /dev/null -w '%{url_effective}' https://github.com/gdy666/lucky/releases/latest | sed -n 's#.*/tag/v##p')
+	if [ -n "$ver" ] && curl -fsIL -o /dev/null "https://github.com/gdy666/lucky/releases/download/v${ver}/lucky_${ver}_Linux_x86_64.tar.gz"; then
+		sed -i "s/^PKG_VERSION:=.*/PKG_VERSION:=${ver}/" "$LUCKY_MK"
+	fi
+	echo "Lucky 版本: $(grep '^PKG_VERSION:=' "$LUCKY_MK")"
+fi
