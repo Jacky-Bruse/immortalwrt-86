@@ -26,6 +26,15 @@ uci commit firewall
 exit 0
 EOF
 
+# 首次开机启用 irqbalance：软件包默认 enabled=0，装了也不运行；关闭流量卸载后转发全靠 CPU，需要把网卡中断分散到各核
+cat > files/etc/uci-defaults/99-enable-irqbalance <<'EOF'
+#!/bin/sh
+uci -q get irqbalance.irqbalance >/dev/null || exit 0
+uci set irqbalance.irqbalance.enabled='1'
+uci commit irqbalance
+exit 0
+EOF
+
 # 修复 nft-fullcone 误注销 ctnetlink 的连接事件通知，导致 nlbwmon/conntrack -E 收不到事件、设备流量为空：
 # 内核 >= 5.15 每个 netns 只能有一个事件接收者，位置已被 ctnetlink 占用时 fullcone 跳过注册却仍记为已注册，
 # fw4 启动时的 fullcone 探测（nft -c）让引用计数归零，随即清空了 ctnetlink 的注册

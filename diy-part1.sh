@@ -53,7 +53,6 @@ kpatch=`cat include/kernel-${str1} target/linux/generic/kernel-${str1} 2>/dev/nu
 sleep 2
 if [ -e bin/targets/x86/64/immortalwrt-x86-64-generic-squashfs-combined.img.gz ];then
   mv  bin/targets/x86/64/immortalwrt-x86-64-generic-squashfs-combined.img.gz       bin/targets/x86/64/immortalwrt_x86-64-${rename_version}_${str1}.${kpatch}_sta_Lee.img.gz
-  mv  bin/targets/x86/64/immortalwrt-x86-64-generic-squashfs-combined-efi.img.gz   bin/targets/x86/64/immortalwrt_x86-64-${rename_version}_${str1}.${kpatch}_uefi-gpt_sta_Lee.img.gz
 fi
 exit 0
 EOF
