@@ -61,14 +61,11 @@ EOF
 cat>Lee.sh<<-\EOOF
 #!/bin/bash
 Lee_version="`date '+%y%m%d%H%M'`_sta_Lee"
-echo $Lee_version >  wget/DISTRIB_REVISION1
 echo $Lee_version | cut -d _ -f 1 >  files/etc/Lee_version
-new_DISTRIB_REVISION=`cat  wget/DISTRIB_REVISION1`
-# 将固件版本号写入系统描述（网页概况页显示）
-sed -i 's/exit 0/ /'  package/emortal/default-settings/files/99-default-settings
-cat>> package/emortal/default-settings/files/99-default-settings<<-EOF
-	sed -i '/DISTRIB_DESCRIPTION/d' /etc/openwrt_release
-	echo "DISTRIB_DESCRIPTION='$new_DISTRIB_REVISION'" >> /etc/openwrt_release
-	exit 0
-	EOF
+# 固件版本描述编译时写入模板：网页概况页读 /usr/lib/os-release 的 OPENWRT_RELEASE，/etc/openwrt_release 同步保持一致
+# 版本号取自源码分支名（openwrt-25.12 → 25.12），换分支无需手改
+branch=`git rev-parse --abbrev-ref HEAD`
+desc="ImmortalWrt ${branch#openwrt-} · $Lee_version"
+sed -i "s|^OPENWRT_RELEASE=.*|OPENWRT_RELEASE=\"$desc\"|" package/base-files/files/usr/lib/os-release
+sed -i "s|^DISTRIB_DESCRIPTION=.*|DISTRIB_DESCRIPTION='$desc'|" package/base-files/files/etc/openwrt_release
 EOOF

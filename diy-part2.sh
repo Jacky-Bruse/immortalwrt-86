@@ -118,6 +118,11 @@ first=1; [ -f "$state" ] && first=0
 EOF
 chmod +x files/usr/sbin/wrtbwmon
 
+# 概况页"固件版本"去掉 " / LuCI 版本号" 尾巴，只显示固件版本描述
+STATUS_JS=feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js
+sed -i "s#boardinfo.release.description + ' / ' : '') + (luciversion || '')#boardinfo.release.description : '')#" "$STATUS_JS"
+grep -q "luciversion || ''" "$STATUS_JS" && echo "警告: 10_system.js 结构已变，LuCI 版本尾巴未去掉"
+
 # Lucky 软件源的 Makefile 写死了版本号，改为 GitHub 最新正式版（releases/latest 不含预发布）
 # 获取失败或该版本没有 x86_64 包时保留软件源自带的版本，不影响编译
 LUCKY_MK=feeds/lucky/lucky/Makefile
