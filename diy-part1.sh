@@ -27,8 +27,6 @@ echo "src-git lucky https://github.com/gdy666/luci-app-lucky.git;main" >> "feeds
 mkdir -p files/usr/share
 mkdir -p files/etc/
 touch files/etc/Lee_version
-mkdir wget
-touch wget/DISTRIB_REVISION1
 
 # backup config
 cat>> package/base-files/files/lib/upgrade/keep.d/base-files-essential<<-EOF
