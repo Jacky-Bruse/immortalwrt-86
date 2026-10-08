@@ -35,34 +35,10 @@ uci commit irqbalance
 exit 0
 EOF
 
-# 修复 nft-fullcone 误注销 ctnetlink 的连接事件通知，导致 nlbwmon/conntrack -E 收不到事件、设备流量为空：
-# 内核 >= 5.15 每个 netns 只能有一个事件接收者，位置已被 ctnetlink 占用时 fullcone 跳过注册却仍记为已注册，
-# fw4 启动时的 fullcone 探测（nft -c）让引用计数归零，随即清空了 ctnetlink 的注册
-FULLCONE_PATCHES=package/network/utils/fullconenat-nft/patches
-if [ -d "$FULLCONE_PATCHES" ]; then
-	cat > "$FULLCONE_PATCHES/020-fix-ct-notifier-unregister.patch" <<'EOF'
---- a/src/nft_ext_fullcone.c
-+++ b/src/nft_ext_fullcone.c
-@@ -164,6 +164,8 @@ static int nft_fullcone_init(const struct nft_ctx *ctx, const struct nft_expr *e
- #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0) && !defined(CONFIG_NF_CONNTRACK_CHAIN_EVENTS)
- 		if (!READ_ONCE(ctx->net->ct.nf_conntrack_event_cb)) {
- 			nf_conntrack_register_notifier(ctx->net, &ct_event_notifier);
-+		} else {
-+			register_ct_notifier_ret = -EBUSY;
- 		}
- #else
- 		register_ct_notifier_ret = nf_conntrack_register_notifier(ctx->net, &ct_event_notifier);
-@@ -254,7 +256,8 @@ static void nft_fullcone_common_destory(const struct nft_ctx *ctx)
- 	if (module_refer_count == 0) {
- 		if (ct_event_notifier_registered) {
- #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0) && !defined(CONFIG_NF_CONNTRACK_CHAIN_EVENTS)
--			nf_conntrack_unregister_notifier(ctx->net);
-+			if (rcu_access_pointer(ctx->net->ct.nf_conntrack_event_cb) == &ct_event_notifier)
-+				nf_conntrack_unregister_notifier(ctx->net);
- #else
- 			nf_conntrack_unregister_notifier(ctx->net, &ct_event_notifier);
- #endif
-EOF
+# 内核连接事件改为通知链，允许 ctnetlink 与 fullcone 同时订阅（ImmortalWrt 维护者提供，见 immortalwrt/immortalwrt#2496）
+# fullcone 软件包已要求 CONFIG_NF_CONNTRACK_CHAIN_EVENTS=y，此补丁提供该选项的实现
+if [ -d target/linux/generic/hack-6.12 ]; then
+	cp "$(dirname "$0")/patches/952-net-conntrack-events-support-multiple-registrant.patch" target/linux/generic/hack-6.12/
 fi
 
 # AdGuardHome 工作目录默认在 /var（内存盘），重启后规则和统计全丢，改到固定存储
