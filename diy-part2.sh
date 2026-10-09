@@ -35,12 +35,6 @@ uci commit irqbalance
 exit 0
 EOF
 
-# 内核连接事件改为通知链，允许 ctnetlink 与 fullcone 同时订阅（ImmortalWrt 维护者提供，见 immortalwrt/immortalwrt#2496）
-# fullcone 软件包已要求 CONFIG_NF_CONNTRACK_CHAIN_EVENTS=y，此补丁提供该选项的实现
-if [ -d target/linux/generic/hack-6.12 ]; then
-	cp "$(dirname "$0")/patches/952-net-conntrack-events-support-multiple-registrant.patch" target/linux/generic/hack-6.12/
-fi
-
 # AdGuardHome 工作目录默认在 /var（内存盘），重启后规则和统计全丢，改到固定存储
 # 24.10 选项名为 workdir，25.12 为 work_dir；仅在仍为默认值时修改，不覆盖手动设置
 cat > files/etc/uci-defaults/99-adguardhome-workdir <<'EOF'
